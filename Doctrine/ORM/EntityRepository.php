@@ -72,18 +72,18 @@ class EntityRepository extends BaseEntityRepository implements RepositoryInterfa
 
     /**
      * @param array $criteria
-     * @param array $sorting
+     * @param array $orderBy
      * @param int   $limit
      * @param int   $offset
      *
      * @return array
      */
-    public function findBy(array $criteria, array $sorting = array(), $limit = null, $offset = null)
+    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
     {
         $queryBuilder = $this->getCollectionQueryBuilder();
 
         $this->applyCriteria($queryBuilder, $criteria);
-        $this->applySorting($queryBuilder, $sorting);
+        $this->applySorting($queryBuilder, $orderBy);
 
         if (null !== $limit) {
             $queryBuilder->setMaxResults($limit);
@@ -122,12 +122,12 @@ class EntityRepository extends BaseEntityRepository implements RepositoryInterfa
     /**
      * {@inheritdoc}
      */
-    public function createPaginator(array $criteria = array(), array $sorting = array())
+    public function createPaginator(array $criteria = null, array $orderBy = null)
     {
         $queryBuilder = $this->getCollectionQueryBuilder();
 
         $this->applyCriteria($queryBuilder, $criteria);
-        $this->applySorting($queryBuilder, $sorting);
+        $this->applySorting($queryBuilder, $orderBy);
 
         return $this->getPaginator($queryBuilder);
     }
@@ -195,8 +195,12 @@ class EntityRepository extends BaseEntityRepository implements RepositoryInterfa
      * @param QueryBuilder $queryBuilder
      * @param array        $sorting
      */
-    protected function applySorting(QueryBuilder $queryBuilder, array $sorting = array())
+    protected function applySorting(QueryBuilder $queryBuilder, array $sorting = null)
     {
+        if (null === $sorting) {
+            return;
+        }
+
         foreach ($sorting as $property => $order) {
             if (!empty($order)) {
                 $queryBuilder->addOrderBy($this->getPropertyName($property), $order);
